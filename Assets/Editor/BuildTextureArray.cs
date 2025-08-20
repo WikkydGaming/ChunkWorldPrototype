@@ -1,6 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 
+// This is a NON GAME related tool. 
+// It was created by ChatGPT to make texture arrays
+
+// To use it you select some textures then go to Tools menu
+// and then Terrain ->  Build Albedo texture2dArray
 public static class BuildTextureArray
 {
     [MenuItem("Tools/Terrain/Build Albedo Texture2DArray")]
