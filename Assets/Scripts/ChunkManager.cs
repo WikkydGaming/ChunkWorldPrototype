@@ -8,6 +8,9 @@ public class ChunkManager : MonoBehaviour
     public int loadRadius = 3;            // chunks in each direction (3 => 7x7 loaded)
     public bool buildColliders = false;
 
+    [SerializeField] float metersPerTileRepeat = 2f; // UV tiling
+    [SerializeField, Range(0.05f, 1.0f)] float blendRadiusTiles = 0.35f; // edge softness in tiles
+
     readonly Dictionary<ChunkKey, ChunkRenderer> _active = new();
     readonly Queue<ChunkRenderer> _pool = new();
 
@@ -51,7 +54,9 @@ public class ChunkManager : MonoBehaviour
         go.transform.position = ChunkMath.ChunkOrigin(key);
 
         var cr = go.GetComponent<ChunkRenderer>();
-        cr.buildCollider = buildColliders;
+        cr.buildCollider = buildColliders; 
+        cr.MetersPerTileRepeat = metersPerTileRepeat;
+        cr.BlendRadiusTiles = blendRadiusTiles;
         cr.BuildChunk(key);
 
         _active[key] = cr;
