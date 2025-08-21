@@ -31,7 +31,7 @@ public class ChunkManager : MonoBehaviour
         {
             for (int dx = -loadRadius; dx <= loadRadius; dx++)
             {
-                var key = new ChunkKey(centerKey.cx + dx, centerKey.cy + dy);
+                var key = new ChunkKey(centerKey.cx + dx, centerKey.cz + dy);
                 want.Add(key);
                 if (_active.ContainsKey(key)) continue;
                 LoadChunk(key);
@@ -50,13 +50,13 @@ public class ChunkManager : MonoBehaviour
     void LoadChunk(ChunkKey key)
     {
         var go = GetOrCreateChunkGO();
-        go.name = $"Chunk {key.cx},{key.cy}";
-        go.transform.position = ChunkMath.ChunkOrigin(key);
+        go.name = $"Chunk {key.cx},{key.cz}";
+        go.transform.position = ChunkMath.ChunkOriginWorldCoords(key);
 
         var cr = go.GetComponent<ChunkRenderer>();
         cr.buildCollider = buildColliders; 
-        cr.MetersPerTileRepeat = metersPerTileRepeat;
-        cr.BlendRadiusTiles = blendRadiusTiles;
+        //cr.MetersPerTileRepeat = metersPerTileRepeat;
+        //cr.BlendRadiusTiles = blendRadiusTiles;
         cr.BuildChunk(key);
 
         _active[key] = cr;

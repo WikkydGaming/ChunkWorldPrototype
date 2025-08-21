@@ -64,15 +64,28 @@ public static class WorldGen
 };
     static readonly NoiseProfile Hills = new NoiseProfile
     {
-        octaves = 5,
+        octaves = 3,
         baseFrequency = 0.0035f,
-        lacunarity = 2.0f,
+        lacunarity = 1.0f,
         persistence = 0.5f,
-        amplitude = 18f,
+        amplitude = 175f,
         ridge = false,
         warpAmount = 20f,
         warpFrequency = 0.0018f
     };
+
+    static readonly NoiseProfile Dunes = new NoiseProfile
+    {
+        octaves = 3,
+        baseFrequency = 0.0035f,
+        lacunarity = 3.0f,
+        persistence = 0.5f,
+        amplitude = 25f,
+        ridge = true,
+        warpAmount = 20f,
+        warpFrequency = 0.0018f
+    };
+
     static readonly NoiseProfile Flats = new NoiseProfile
     {
         octaves = 3,
@@ -95,6 +108,11 @@ public static class WorldGen
 
         // OPTION SIGNMOID BIOME BLEND
         var w = BiomeWeights1D(gx, gy);
+
+        // DEBUG CODE TO TEST ONLY ONE BIOME TYPE
+        w = new Vector3(0.0f, 1.0f, 0.0f);
+        // END DEBUG CODE
+
         float h = SampleProfile(Mountains, gx, gy) * w.x
                  + SampleProfile(Hills, gx, gy) * w.y
                  + SampleProfile(Flats, gx, gy) * w.z;
@@ -170,7 +188,7 @@ public static class WorldGen
 
         float wm = gateMtn;        // mountains dominate high n
         float wf = gateFlat;       // flats dominate low n
-        float wh = Mathf.Clamp01(1f - wm - wf); // hills fill the middle band
+        float wh = Mathf.Clamp01(1.0f - wm - wf); // hills fill the middle band
 
         // Normalize (robust)
         float s = wm + wh + wf + 1e-6f;

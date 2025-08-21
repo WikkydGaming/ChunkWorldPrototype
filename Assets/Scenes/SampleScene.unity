@@ -245,7 +245,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &300944680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,8 +259,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2055231081}
-  chunkMaterial: {fileID: 2100000, guid: dc0fbc2ea41549d4ab63a80d4db3e655, type: 2}
-  loadRadius: 5
+  chunkMaterial: {fileID: 2100000, guid: 3e9354ed1dc555c46abadfdb3ab1d12f, type: 2}
+  loadRadius: 3
   buildColliders: 0
   metersPerTileRepeat: 2
   blendRadiusTiles: 0.276
@@ -553,7 +553,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &415441072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,12 +599,12 @@ GameObject:
   - component: {fileID: 657567961}
   - component: {fileID: 657567960}
   m_Layer: 0
-  m_Name: Quad
+  m_Name: StaticTestQuad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &657567960
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -792,7 +792,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!143 &2055231080
 CharacterController:
   m_ObjectHideFlags: 0
