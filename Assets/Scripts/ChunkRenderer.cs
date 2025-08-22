@@ -42,6 +42,11 @@ public class ChunkRenderer : MonoBehaviour
         int gx0 = key.cx * chunkSize;
         int gz0 = key.cz * chunkSize;
 
+        // DEBUG CODE
+        Debug.Log("CHUNK ORIGIN COORDS GXO: " + gx0 + " GZ0: " + gz0);   
+        DebugWrldGenStrategy dbgWrldGenStrat = new DebugWrldGenStrategy(gx0, gz0, chunkSize);
+        WorldGenerator worldGenerator = new WorldGenerator(dbgWrldGenStrat);
+        // END DEBUG CODE
 
         // Texture Array Sketchpad
         // 
@@ -50,7 +55,7 @@ public class ChunkRenderer : MonoBehaviour
 
         // build vertex array
         int vi = 0;
-        float layerIndex;
+        //float layerIndex;
 
         // X and Z refer to Tile Global Tile Coordinates
         // This loop builds the mesh in local X&Z mesh coordinates but the Y component
@@ -63,10 +68,18 @@ public class ChunkRenderer : MonoBehaviour
                 // Compute the World Space X and Z coords of the current 
 
                 int gx = gx0 + x;
-                int gy = gz0 + z;
+                int gz = gz0 + z;
 
-                float h = WorldGen.GetHeightM(gx, gy);
+                // ORIGINAL CODE 
+                //float h = WorldGen.GetHeightM(gx, gy);
+                //verts[vi] = new Vector3(x * ChunkMath.TILE_SIZE, h, z * ChunkMath.TILE_SIZE);
+                // END ORIGINAL CODE
+
+                // DEBUG CODE
+                float h = worldGenerator.GetVertexHeight(gx, gz);
                 verts[vi] = new Vector3(x * ChunkMath.TILE_SIZE, h, z * ChunkMath.TILE_SIZE);
+                // END DEBUG CODE
+
 
                 // color by type at the nearest cell (clamp to N-1 to avoid out-of-range)
                 int cx = Mathf.Clamp(x, 0, chunkSize - 1);
@@ -86,7 +99,7 @@ public class ChunkRenderer : MonoBehaviour
 
                 // world coords for this vertex (relative to world)
                 float wx = (gx) * ChunkMath.TILE_SIZE;
-                float wy = (gy) * ChunkMath.TILE_SIZE;
+                float wy = (gz) * ChunkMath.TILE_SIZE;
                 uvs[vi] = new Vector2(wx / metersPerTileRepeat, wy / metersPerTileRepeat);
 
                 // DEPRECATED
@@ -108,9 +121,9 @@ public class ChunkRenderer : MonoBehaviour
 
         vi = 0;
 
-        for (int z = 1; z < chunkSize - 1; z++)
+        for (int z = 0; z <= chunkSize; z++)
         {
-            for (int x = 1; x < chunkSize - 1; x++)
+            for (int x = 0; x <= chunkSize; x++)
             {
                 int gx = gx0 + x;
                 int gz = gz0 + z;
@@ -118,36 +131,121 @@ public class ChunkRenderer : MonoBehaviour
                 //int cxn = Mathf.Clamp(x, 0, chunkSize - 1);
                 //int czn = Mathf.Clamp(z, 0, chunkSize - 1);
 
-                // Get current tile type and add to vertTextures 
-                float hc = WorldGen.GetHeightM(gx, gz);
-                var type = WorldGen.GetTypeAt(gx, gz, hc);
+                // Get current tile type and add to vertTextures
+                // ORIGINAL CODE
+                //float hc = WorldGen.GetHeightM(gx, gz);
+                //var type = WorldGen.GetTypeAt(gx, gz, hc);
+                //vertTextures.Add((float)type, 1);
+
+                ////
+                ////vertLayerIndices[type] += 1;
+
+                ////layerIndex = TerrainLayers.IndexFor(type);
+
+                //// Get left adjacent type and add it to vertTextures count.
+                //hc = WorldGen.GetHeightM(gx-1, gz);
+                //type = WorldGen.GetTypeAt(gx -1, gz, hc);
+                //if (vertTextures.ContainsKey((float)type))
+                //    vertTextures[(float)type] += 1;
+                //else vertTextures.Add((float)type, 1);
+
+                //// Get bottom left adjacent type and add it to vertTextures count.
+                //hc = WorldGen.GetHeightM(gx - 1, gz - 1);
+                //type = WorldGen.GetTypeAt(gx - 1, gz - 1, hc);
+                //if (vertTextures.ContainsKey((float)type))
+                //    vertTextures[(float)type] += 1;
+                //else vertTextures.Add((float)type, 1);
+
+                //// Get bottom adjacent type and add it to vertTextures count.
+                //hc = WorldGen.GetHeightM(gx, gz - 1);
+                //type = WorldGen.GetTypeAt(gx, gz - 1, hc);
+                //if (vertTextures.ContainsKey((float)type))
+                //    vertTextures[(float)type] += 1;
+                //else vertTextures.Add((float)type, 1);
+
+                //switch ( vertTextures.Count)
+                //{
+                //    case 1:
+                //        vertLayerIndices[vi].x = vertTextures.ElementAt(0).Key;
+                //        vertLayerIndices[vi].y = 0.0f;
+                //        vertLayerIndices[vi].z = 0.0f;
+                //        vertLayerIndices[vi].w = 0.0f;
+
+                //        vertBlendWeights[vi].x = 1.0f;
+                //        vertBlendWeights[vi].y = 0.0f;
+                //        vertBlendWeights[vi].z = 0.0f;
+                //        vertBlendWeights[vi].w = 0.0f;
+                //        break;
+                //    case 2:
+                //        vertLayerIndices[vi].x = vertTextures.ElementAt(0).Key;
+                //        vertLayerIndices[vi].y = vertTextures.ElementAt(1).Key;
+                //        vertLayerIndices[vi].z = 0.0f;
+                //        vertLayerIndices[vi].w = 0.0f;
+
+                //        vertBlendWeights[vi].x = 0.5f;
+                //        vertBlendWeights[vi].y = 0.5f;
+                //        vertBlendWeights[vi].z = 0.0f;
+                //        vertBlendWeights[vi].w = 0.0f;
+                //        break;
+                //    case 3:
+                //        vertLayerIndices[vi].x = vertTextures.ElementAt(0).Key;
+                //        vertLayerIndices[vi].y = vertTextures.ElementAt(1).Key;
+                //        vertLayerIndices[vi].z = vertTextures.ElementAt(2).Key;
+                //        vertLayerIndices[vi].w = 0.0f;
+
+                //        vertBlendWeights[vi].x = 1.0f / 3.0f;
+                //        vertBlendWeights[vi].y = 1.0f / 3.0f;
+                //        vertBlendWeights[vi].z = 1.0f - 2.0f / 3.0f;
+                //        vertBlendWeights[vi].w = 0.0f;
+                //        break;
+                //    case 4:
+                //        vertLayerIndices[vi].x = vertTextures.ElementAt(0).Key;
+                //        vertLayerIndices[vi].y = vertTextures.ElementAt(1).Key;
+                //        vertLayerIndices[vi].z = vertTextures.ElementAt(2).Key;
+                //        vertLayerIndices[vi].w = vertTextures.ElementAt(3).Key;
+
+                //        vertBlendWeights[vi].x = 0.25f;
+                //        vertBlendWeights[vi].y = 0.25f;
+                //        vertBlendWeights[vi].z = 0.25f;
+                //        vertBlendWeights[vi].w = 0.25f;
+                //        break;
+                //    default:
+                //        Debug.LogError("Impossible case with switch for vertTextures");
+                //        break;
+                //}
+
+                //// END ORIGINAL CODE
+                ///
+
+
+                // DEBUG CODE
+                var type = worldGenerator.GetTileTerrainType(gx, gz);
                 vertTextures.Add((float)type, 1);
+
+                //
                 //vertLayerIndices[type] += 1;
 
                 //layerIndex = TerrainLayers.IndexFor(type);
 
                 // Get left adjacent type and add it to vertTextures count.
-                hc = WorldGen.GetHeightM(gx-1, gz);
-                type = WorldGen.GetTypeAt(gx -1, gz, hc);
+                type = worldGenerator.GetTileTerrainType(gx - 1, gz);
                 if (vertTextures.ContainsKey((float)type))
                     vertTextures[(float)type] += 1;
                 else vertTextures.Add((float)type, 1);
 
                 // Get bottom left adjacent type and add it to vertTextures count.
-                hc = WorldGen.GetHeightM(gx - 1, gz - 1);
-                type = WorldGen.GetTypeAt(gx - 1, gz - 1, hc);
-                if (vertTextures.ContainsKey((float)type))
-                    vertTextures[(float)type] += 1;
-                else vertTextures.Add((float)type, 1);
+                //type = worldGenerator.GetTileTerrainType(gx - 1, gz - 1);
+                //if (vertTextures.ContainsKey((float)type))
+                //    vertTextures[(float)type] += 1;
+                //else vertTextures.Add((float)type, 1);
 
                 // Get bottom adjacent type and add it to vertTextures count.
-                hc = WorldGen.GetHeightM(gx, gz - 1);
-                type = WorldGen.GetTypeAt(gx, gz - 1, hc);
+                type = worldGenerator.GetTileTerrainType(gx, gz - 1);
                 if (vertTextures.ContainsKey((float)type))
                     vertTextures[(float)type] += 1;
                 else vertTextures.Add((float)type, 1);
 
-                switch ( vertTextures.Count)
+                switch (vertTextures.Count)
                 {
                     case 1:
                         vertLayerIndices[vi].x = vertTextures.ElementAt(0).Key;
@@ -179,7 +277,7 @@ public class ChunkRenderer : MonoBehaviour
 
                         vertBlendWeights[vi].x = 1.0f / 3.0f;
                         vertBlendWeights[vi].y = 1.0f / 3.0f;
-                        vertBlendWeights[vi].z = 1.0f - 2.0f / 3.0f;
+                        vertBlendWeights[vi].z = 1.0f / 3.0f;
                         vertBlendWeights[vi].w = 0.0f;
                         break;
                     case 4:
@@ -196,8 +294,11 @@ public class ChunkRenderer : MonoBehaviour
                     default:
                         Debug.LogError("Impossible case with switch for vertTextures");
                         break;
-
                 }
+
+
+
+                // END DEBUG CODE
 
                 //Debug.Log("Layers " + vertLayerIndices[vi].ToString());
                 //Debug.Log("Weights " + vertBlendWeights[vi].ToString());

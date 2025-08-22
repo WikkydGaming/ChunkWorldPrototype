@@ -260,7 +260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 2055231081}
   chunkMaterial: {fileID: 2100000, guid: 3e9354ed1dc555c46abadfdb3ab1d12f, type: 2}
-  loadRadius: 3
+  loadRadius: 0
   buildColliders: 0
   metersPerTileRepeat: 2
   blendRadiusTiles: 0.276
