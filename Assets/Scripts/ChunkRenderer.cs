@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -27,7 +28,16 @@ public class ChunkRenderer : MonoBehaviour
         }
 
         int chunkSize = ChunkMath.CHUNK_SIZE;
-        int vertCount = (chunkSize + 1) * (chunkSize + 1);
+        float tileSize = ChunkMath.TILE_SIZE;
+
+        // ORIGINAL VERT COUNT WITH JUST TWO TRIANGLES PER TILE
+        //int vertCount = (chunkSize + 1) * (chunkSize + 1);
+
+        // NEW VERT COUNT WITH 4 TRIANGLES PER TILE
+        int vertCount = (2 * chunkSize + 1) * (chunkSize) + (chunkSize + 1);
+
+        Debug.Log("Vert Count: " + vertCount);
+
         var verts = new Vector3[vertCount];
         //var cols = new Color[vCount];
         //var uvs = new Vector2[vCount];
@@ -57,6 +67,8 @@ public class ChunkRenderer : MonoBehaviour
         int vi = 0;
         //float layerIndex;
 
+        Debug.Log("Chunksize: " + chunkSize);
+
         // X and Z refer to Tile Global Tile Coordinates
         // This loop builds the mesh in local X&Z mesh coordinates but the Y component
         // is built by converting those X/Z coords into World coordingates then
@@ -65,8 +77,9 @@ public class ChunkRenderer : MonoBehaviour
         {
             for (int x = 0; x <= chunkSize; x++)
             {
-                // Compute the World Space X and Z coords of the current 
+                Debug.Log("START VI " + vi);
 
+                // Compute the World Space X and Z coords of the current 
                 int gx = gx0 + x;
                 int gz = gz0 + z;
 
@@ -77,36 +90,75 @@ public class ChunkRenderer : MonoBehaviour
 
                 // DEBUG CODE
                 float h = worldGenerator.GetVertexHeight(gx, gz);
-                verts[vi] = new Vector3(x * ChunkMath.TILE_SIZE, h, z * ChunkMath.TILE_SIZE);
+                verts[vi] = new Vector3(x * tileSize, h, z * tileSize);
+
+                Debug.Log("Vert " + vi + " is " + verts[vi] + " X: " + x + " Z: " + z);
+
+                // world coords for this vertex (relative to world)
+                float wx = gx * tileSize;
+                float wy = gz * tileSize;
+                uvs[vi] = new Vector2(wx / metersPerTileRepeat, wy / metersPerTileRepeat);
+
+                vi++;
+
+                // Now do center point of the tile if we are not on the last row or last
+                // column of vertices.
+
+                bool xEqualsCS;
+
+
+                if (x == chunkSize)
+                {
+                    xEqualsCS = true;
+                }
+                else
+                {
+                    xEqualsCS = false;
+                }
+                Debug.Log("xEqualsCS: " + xEqualsCS);
+
+                if ( ( x != chunkSize ) && ( z != chunkSize ) )
+                {
+                    h = worldGenerator.GetVertexHeight(gx + tileSize / 2.0f, gz + tileSize / 2.0f);
+                    verts[vi] = new Vector3(x + tileSize / 2.0f, h, z + tileSize / 2.0f);
+
+                    Debug.Log("Vert " + vi + " is " + verts[vi] + " X: " + x + " Z: " + z);
+
+                    wx = (gx + 0.5f) * tileSize;
+                    wy = (gz + 0.5f) * tileSize;
+                    uvs[vi] = new Vector2(wx / metersPerTileRepeat, wy / metersPerTileRepeat);
+
+                    vi++;
+                }
                 // END DEBUG CODE
 
 
                 // color by type at the nearest cell (clamp to N-1 to avoid out-of-range)
-                int cx = Mathf.Clamp(x, 0, chunkSize - 1);
-                int cz = Mathf.Clamp(z, 0, chunkSize - 1);
+                //int cx = Mathf.Clamp(x, 0, chunkSize - 1);
+                //int cz = Mathf.Clamp(z, 0, chunkSize - 1);
                 //float hc = WorldGen.GetHeightM(gx0 + cx, gy0 + cy);
                 //var type = WorldGen.GetTypeAt(gx0 + cx, gy0 + cy, hc);
 
                 // Pick a layer index from the NEAREST cell (or choose a rule you prefer)
-                int cxn = Mathf.Clamp(x, 0, chunkSize - 1);
-                int czn = Mathf.Clamp(z, 0, chunkSize - 1);
-                float hc = WorldGen.GetHeightM(gx0 + cxn, gz0 + czn);
-                var type = WorldGen.GetTypeAt(gx0 + cxn, gz0 + czn, hc);
-                
+                //int cxn = Mathf.Clamp(x, 0, chunkSize - 1);
+                //int czn = Mathf.Clamp(z, 0, chunkSize - 1);
+                //float hc = WorldGen.GetHeightM(gx0 + cxn, gz0 + czn);
+                //var type = WorldGen.GetTypeAt(gx0 + cxn, gz0 + czn, hc);
+
                 //Debug.Log(type);
                 //cols[vi] = WorldGen.ColorFor(type);
                 //uvs[vi] = new Vector2((float)x / N, (float)y / N);
 
                 // world coords for this vertex (relative to world)
-                float wx = (gx) * ChunkMath.TILE_SIZE;
-                float wy = (gz) * ChunkMath.TILE_SIZE;
-                uvs[vi] = new Vector2(wx / metersPerTileRepeat, wy / metersPerTileRepeat);
+                //float wx = (gx) * ChunkMath.TILE_SIZE;
+                //float wy = (gz) * ChunkMath.TILE_SIZE;
+                //uvs[vi] = new Vector2(wx / metersPerTileRepeat, wy / metersPerTileRepeat);
 
                 // DEPRECATED
                 // Store normalized index in uv2.x (0..1). Support up to 256 layers by encoding /255.
                 //uv2s[vi] = new Vector2(layerIndex / 255f, 0f);
 
-                vi++;
+                //vi++;
             }
         }
 
@@ -319,22 +371,68 @@ public class ChunkRenderer : MonoBehaviour
 
 
         // triangles
+        // ORIGINAL TRIANGLES CODE
+        //int quadCount = chunkSize * chunkSize;
+        //var tris = new int[quadCount * 6];
+        //int ti = 0;
+        //for (int z = 0; z < chunkSize; z++)
+        //{
+        //    for (int x = 0; x < chunkSize; x++)
+        //    {
+        //        int v00 = z * (chunkSize + 1) + x;
+        //        int v10 = v00 + 1;
+        //        int v01 = v00 + (chunkSize + 1);
+        //        int v11 = v01 + 1;
+
+        //        // two triangles per quad
+        //        tris[ti++] = v00; tris[ti++] = v01; tris[ti++] = v10;
+        //        tris[ti++] = v10; tris[ti++] = v01; tris[ti++] = v11;
+        //    }
+        //}
+        // END ORIGINAL TRIANGLES CODE
+
+
+        // triangles
         int quadCount = chunkSize * chunkSize;
-        var tris = new int[quadCount * 6];
+        var tris = new int[quadCount * 12];
         int ti = 0;
+
+        Debug.Log("Tris count: " + quadCount * 12);
         for (int z = 0; z < chunkSize; z++)
         {
             for (int x = 0; x < chunkSize; x++)
             {
-                int v00 = z * (chunkSize + 1) + x;
-                int v10 = v00 + 1;
-                int v01 = v00 + (chunkSize + 1);
-                int v11 = v01 + 1;
+                // Create vars for the 5 vertices of a tile.
+                int v00 = z * (2 * chunkSize + 1) + 2*x;
+                int v10 = v00 + 2;
+                int vM = v00 + 1;
 
-                // two triangles per quad
-                tris[ti++] = v00; tris[ti++] = v01; tris[ti++] = v10;
-                tris[ti++] = v10; tris[ti++] = v01; tris[ti++] = v11;
+                int v01;
+                int v11;
+
+                if (z < chunkSize - 1)
+                {
+
+                    v01 = v00 + (2 * chunkSize + 1);
+                    v11 = v01 + 2;
+                    Debug.Log("A V00: " + v00 + " V10: " + v10 + " V01: " + v01 + " V11: " + v11 + " VM: " + vM);
+                }
+                else
+                {
+                    v01 = v00 + 2*(chunkSize - x) + x + 1;
+                    v11 = v01 + 1;
+                    Debug.Log("B V00: " + v00 + " V10: " + v10 + " V01: " + v01 + " V11: " + v11 + " VM: " + vM);
+                }
+
+
+                // Debug.Log("V00: " + v00 + " V10: " + v10 + " V01: " + v01 + " V11: " + v11 + " VM: " + vM);
+                // four triangles per quad
+                tris[ti++] = v00; tris[ti++] = vM; tris[ti++] = v10;
+                tris[ti++] = v00; tris[ti++] = v01; tris[ti++] = vM;
+                tris[ti++] = v01; tris[ti++] = v11; tris[ti++] = vM;
+                tris[ti++] = vM; tris[ti++] = v11; tris[ti++] = v10;
             }
+            Debug.Log("END X row " + z);
         }
 
 

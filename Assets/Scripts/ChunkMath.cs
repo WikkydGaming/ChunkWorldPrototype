@@ -4,6 +4,8 @@ using UnityEngine;
 public static class ChunkMath
 {
     public const int CHUNK_SIZE = 64;     // tiles per chunk (1m per tile)
+
+    //public const int CHUNK_SIZE = 2;     // tiles per chunk (1m per tile)
     public const float TILE_SIZE = 1f;    // meters per tile
     public const int numberPossibleTexLayer = 30; // Number of possible Texture layers
 
